@@ -12,10 +12,86 @@
         integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <link rel="stylesheet" href="./assets/css/style.css">
 
-    <title>Document</title>
+    <title>Train Schedule</title>
 </head>
 
 <body>
+    <div class="container-fluid">
+        <div class="jumbotron text-center">
+            <div class="container">
+                <h1 class="display-4">Anytime is Train Time</h1>
+                <p class="lead">Choo Choo. Chee Chee.</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header bg-dark text-light">
+                Current Train Schedule
+            </div>
+            <table class="table">
+                <thead class="font-weight-bold">
+                    <tr>
+                        <th scope="col">Train Name</th>
+                        <th scope="col">Destination</th>
+                        <th scope="col">Frequency (min)</th>
+                        <th scope="col">Next Arrival</th>
+                        <th scope="col">Minutes Away</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody">
+                    <tr>
+                        <th scope="row">Trenton Express</th>
+                        <td>Trenton</td>
+                        <td>25</td>
+                        <td>05:35 PM</td>
+                        <td>10</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Oregon Trail</th>
+                        <td>Salem, Oregon</td>
+                        <td>3600</td>
+                        <td>1:39 PM</td>
+                        <td>1154</td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Midnight Carriage</th>
+                        <td>Philadelphia</td>
+                        <td>15</td>
+                        <td>05:35 PM</td>
+                        <td>10</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <br>
+
+        <div class="card">
+            <div class="card-header bg-dark text-light">
+                Add Train
+            </div>
+            <form class="p-3">
+                <div class="form-group">
+                    <label>Train Name</label>
+                    <input type="text" class="form-control" id="input-name" placeholder="Enter train name">
+                </div>
+                <div class="form-group">
+                    <label>Destination</label>
+                    <input type="text" class="form-control" id="input-destination" placeholder="Enter destination">
+                </div>
+                <div class="form-group">
+                    <label>First Train Time (HH:mm - military time)</label>
+                    <input type="time" class="form-control" id="input-time">
+                </div>
+                <div class="form-group">
+                    <label>Frequency (min)</label>
+                    <input type="number" class="form-control" id="input-frequency">
+                </div>
+
+                <button type="submit" class="btn btn-dark">Submit</button>
+            </form>
+        </div>
+    </div>
 
     <!-- scripts -->
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
