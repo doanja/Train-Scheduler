@@ -1,38 +1,22 @@
-let database = null;
+let database;
 
-const renderSchedule = trainRecord => {
-  //   console.log('trainRecord :', trainRecord);
-  const tr = $('<tr>');
-  const thName = $('<th>', { scope: 'col' }).text(trainRecord.name);
-  const thDest = $('<th>', { scope: 'col' }).text(trainRecord.destination);
-  const thFreq = $('<th>', { scope: 'col' }).text(trainRecord.frequency);
-  const thArrival = $('<th>', { scope: 'col' }).text(trainRecord.nextArrival);
-  const thTime = $('<th>', { scope: 'col' }).text(trainRecord.minAway); // moment(trainRecord.)
-  // update next arrival too?
+const functionCalledEvery1Min = () => {};
 
-  tr.append(thName, thDest, thFreq, thArrival, thTime);
-  $('#tbody').append(tr);
-};
-
-const createTrainRecordObj = (
-  name,
-  destination,
-  frequency,
-  nextArrival,
-  minAway
-) => {
-  const obj = {
-    name: name,
-    destination: destination,
-    frequency: frequency,
-    nextArrival: nextArrival,
-    minAway: minAway
-  };
-  return obj;
+const pushSchedule = (db, trainRecord) => {
+  db.ref().push({
+    name: trainRecord.name,
+    destination: trainRecord.destination,
+    frequency: trainRecord.frequency,
+    nextArrival: trainRecord.nextArrival,
+    minAway: trainRecord.minAway,
+    dateAdded: firebase.database.ServerValue.TIMESTAMP
+  }),
+    err => {
+      console.log('Error adding to database', err.code);
+    };
 };
 
 const onSubmit = event => {
-  console.log('FUNCTION CALLED: onSubmit');
   event.preventDefault();
 
   const name = $('#input-name')
@@ -62,8 +46,36 @@ const onSubmit = event => {
   pushSchedule(database, trainRecord);
 };
 
+const createTrainRecordObj = (
+  name,
+  destination,
+  frequency,
+  nextArrival,
+  minAway
+) => {
+  const obj = {
+    name: name,
+    destination: destination,
+    frequency: frequency,
+    nextArrival: nextArrival,
+    minAway: minAway
+  };
+  return obj;
+};
+
+const renderSchedule = trainRecord => {
+  const tr = $('<tr>');
+  const thName = $('<th>', { scope: 'col' }).text(trainRecord.name);
+  const thDest = $('<th>', { scope: 'col' }).text(trainRecord.destination);
+  const thFreq = $('<th>', { scope: 'col' }).text(trainRecord.frequency);
+  const thArrival = $('<th>', { scope: 'col' }).text(trainRecord.nextArrival);
+  const thTime = $('<th>', { scope: 'col' }).text(trainRecord.minAway);
+
+  tr.append(thName, thDest, thFreq, thArrival, thTime);
+  $('#tbody').append(tr);
+};
+
 const getSchedule = db => {
-  console.log('FUNCTION CALLED: getSchedule');
   db.ref().on(
     'child_added',
     snapshot => {
@@ -83,21 +95,6 @@ const getSchedule = db => {
   );
 };
 
-const pushSchedule = (db, trainRecord) => {
-  console.log('FUNCTION CALLED: pushSchedule');
-  db.ref().push({
-    name: trainRecord.name,
-    destination: trainRecord.destination,
-    frequency: trainRecord.frequency,
-    nextArrival: trainRecord.nextArrival,
-    minAway: trainRecord.minAway,
-    dateAdded: firebase.database.ServerValue.TIMESTAMP
-  }),
-    err => {
-      console.log('Error adding to database', err.code);
-    };
-};
-
 const initializeFirebase = (key = FIREBASE_API_KEY) => {
   var firebaseConfig = {
     apiKey: key,
@@ -111,10 +108,7 @@ const initializeFirebase = (key = FIREBASE_API_KEY) => {
 };
 
 window.onload = () => {
-  // run something
   database = initializeFirebase();
-
   getSchedule(database);
-
   $('#submit-button').click(onSubmit);
 };
