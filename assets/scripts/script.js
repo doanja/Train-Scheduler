@@ -1,4 +1,6 @@
-const updateSchedule = trainRecord => {
+let database = null;
+
+const renderSchedule = trainRecord => {
   console.log('trainRecord :', trainRecord);
   const tr = $('<tr>');
   const thName = $('<th>', { scope: 'col' }).text(trainRecord.name);
@@ -23,52 +25,84 @@ const createTrainRecordObj = (name, destination, time, frequency) => {
 };
 
 const onSubmit = event => {
+  console.log('FUNCTION CALLED: onSubmit');
   event.preventDefault();
 
   const name = $('#input-name')
     .val()
     .trim();
-  //   console.log('name :', name);
 
   const destination = $('#input-destination')
     .val()
     .trim();
-  //   console.log('destination :', destination);
 
   const time = parseInt(
     $('#input-time')
       .val()
       .trim()
   );
-  //   console.log('time :', time);
 
   const frequency = parseInt(
     $('#input-frequency')
       .val()
       .trim()
   );
-  //   console.log('frequency :', frequency);
 
-  //   const a = createTrainRecordObj(name, destination, time, frequency);
-  //   console.log('a :', a);
-  updateSchedule(createTrainRecordObj(name, destination, time, frequency));
+  const trainRecord = createTrainRecordObj(name, destination, time, frequency);
+  //   updateSchedule(createTrainRecordObj(name, destination, time, frequency));
+  pushSchedule(database, trainRecord);
 };
 
-$('#submit-button').click(onsubmit);
+const getSchedule = db => {
+  console.log('FUNCTION CALLED: getSchedule');
+  db.ref().on(
+    'child_added',
+    snapshot => {
+      renderSchedule(
+        createTrainRecordObj(
+          snapshot.val().name,
+          snapshot.val().destination,
+          0,
+          snapshot.val().frequency
+        )
+      );
+    },
+    err => {
+      console.log('Error reading from database: ', err.code);
+    }
+  );
+};
+
+const pushSchedule = (db, trainRecord) => {
+  console.log('FUNCTION CALLED: pushSchedule');
+  db.ref().push({
+    name: trainRecord.name,
+    destination: trainRecord.destination,
+    frequency: trainRecord.frequency,
+    dateAdded: firebase.database.ServerValue.TIMESTAMP
+  }),
+    err => {
+      console.log('Error adding to database', err.code);
+    };
+};
 
 const initializeFirebase = (key = FIREBASE_API_KEY) => {
-  var config = {
+  var firebaseConfig = {
     apiKey: key,
-    authDomain: 'monday-9-30-19.firebaseapp.com',
-    databaseURL: 'https://monday-9-30-19.firebaseio.com',
-    storageBucket: 'monday-9-30-19.appspot.com'
+    authDomain: 'train-scheduler-bb190.firebaseapp.com',
+    databaseURL: 'https://train-scheduler-bb190.firebaseio.com',
+    storageBucket: 'train-scheduler-bb190.appspot.com'
   };
 
-  firebase.initializeApp(config);
+  firebase.initializeApp(firebaseConfig);
   return firebase.database();
 };
 
 window.onload = () => {
   // run something
+  database = initializeFirebase();
+
+  getSchedule(database);
+
   $('#submit-button').click(onSubmit);
 };
