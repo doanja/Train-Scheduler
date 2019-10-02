@@ -1,25 +1,32 @@
 let database = null;
 
 const renderSchedule = trainRecord => {
-  console.log('trainRecord :', trainRecord);
+  //   console.log('trainRecord :', trainRecord);
   const tr = $('<tr>');
   const thName = $('<th>', { scope: 'col' }).text(trainRecord.name);
   const thDest = $('<th>', { scope: 'col' }).text(trainRecord.destination);
-  const thTime = $('<th>', { scope: 'col' }).text(trainRecord.time);
-  const thArrival = $('<th>', { scope: 'col' }).text('00:00 AM');
   const thFreq = $('<th>', { scope: 'col' }).text(trainRecord.frequency);
+  const thArrival = $('<th>', { scope: 'col' }).text(trainRecord.nextArrival);
+  const thTime = $('<th>', { scope: 'col' }).text(trainRecord.minAway); // moment(trainRecord.)
   // update next arrival too?
 
   tr.append(thName, thDest, thFreq, thArrival, thTime);
   $('#tbody').append(tr);
 };
 
-const createTrainRecordObj = (name, destination, time, frequency) => {
+const createTrainRecordObj = (
+  name,
+  destination,
+  frequency,
+  nextArrival,
+  minAway
+) => {
   const obj = {
     name: name,
     destination: destination,
-    time: time,
-    frequency: frequency
+    frequency: frequency,
+    nextArrival: nextArrival,
+    minAway: minAway
   };
   return obj;
 };
@@ -36,20 +43,22 @@ const onSubmit = event => {
     .val()
     .trim();
 
-  const time = parseInt(
-    $('#input-time')
-      .val()
-      .trim()
+  const frequency = parseInt($('#input-frequency').val());
+
+  const startTime = $('#input-time').val();
+  const startTimeConverted = moment(startTime, 'HH:mm').subtract(1, 'years');
+  const timeDiff = moment().diff(moment(startTimeConverted), 'minutes');
+  const minAway = frequency - (timeDiff % frequency);
+  const nextArrival = moment().add(minAway, 'minutes');
+
+  const trainRecord = createTrainRecordObj(
+    name,
+    destination,
+    frequency,
+    moment(nextArrival).format('hh:mm'),
+    minAway
   );
 
-  const frequency = parseInt(
-    $('#input-frequency')
-      .val()
-      .trim()
-  );
-
-  const trainRecord = createTrainRecordObj(name, destination, time, frequency);
-  //   updateSchedule(createTrainRecordObj(name, destination, time, frequency));
   pushSchedule(database, trainRecord);
 };
 
@@ -62,8 +71,9 @@ const getSchedule = db => {
         createTrainRecordObj(
           snapshot.val().name,
           snapshot.val().destination,
-          0,
-          snapshot.val().frequency
+          snapshot.val().frequency,
+          snapshot.val().nextArrival,
+          snapshot.val().minAway
         )
       );
     },
@@ -79,6 +89,8 @@ const pushSchedule = (db, trainRecord) => {
     name: trainRecord.name,
     destination: trainRecord.destination,
     frequency: trainRecord.frequency,
+    nextArrival: trainRecord.nextArrival,
+    minAway: trainRecord.minAway,
     dateAdded: firebase.database.ServerValue.TIMESTAMP
   }),
     err => {
