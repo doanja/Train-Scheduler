@@ -1,6 +1,18 @@
 let database;
 
-const functionCalledEvery1Min = () => {};
+const functionCalledEvery1Min = () => {
+  // set interval,
+};
+
+const calculateTime = frequency => {
+  const startTime = $('#input-time').val();
+  const startTimeConverted = moment(startTime, 'HH:mm').subtract(1, 'years');
+  const timeDiff = moment().diff(moment(startTimeConverted), 'minutes');
+  const minAway = frequency - (timeDiff % frequency);
+  const nextArrival = moment().add(minAway, 'minutes');
+  const nextArrivalConverted = moment(nextArrival).format('hh:mm');
+  return { nextArrivalConverted, minAway };
+};
 
 const pushSchedule = (db, trainRecord) => {
   db.ref().push({
@@ -29,18 +41,14 @@ const onSubmit = event => {
 
   const frequency = parseInt($('#input-frequency').val());
 
-  const startTime = $('#input-time').val();
-  const startTimeConverted = moment(startTime, 'HH:mm').subtract(1, 'years');
-  const timeDiff = moment().diff(moment(startTimeConverted), 'minutes');
-  const minAway = frequency - (timeDiff % frequency);
-  const nextArrival = moment().add(minAway, 'minutes');
+  const time = calculateTime(frequency);
 
   const trainRecord = createTrainRecordObj(
     name,
     destination,
     frequency,
-    moment(nextArrival).format('hh:mm'),
-    minAway
+    time.nextArrivalConverted,
+    time.minAway
   );
 
   pushSchedule(database, trainRecord);
