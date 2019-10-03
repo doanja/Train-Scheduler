@@ -1,131 +1,168 @@
-let database;
+let database; // the database object
 
-const functionCalledEvery1Min = () => {
-	// set interval,
+/**
+ * function to clear inputs
+ */
+const clearForm = () => {
+  $('input').val('');
 };
 
-const computeMinutesAway = () => {};
-
-const calculateTime = (frequency) => {
-	const startTime = $('#input-time').val();
-	const startTimeConverted = moment(startTime, 'HH:mm').subtract(1, 'years');
-	const timeDiff = moment().diff(moment(startTimeConverted), 'minutes');
-	const minAway = frequency - (timeDiff % frequency);
-	const nextArrival = moment().add(minAway, 'minutes');
-	const nextArrivalConverted = moment(nextArrival).format('hh:mm');
-	return { startTime, nextArrivalConverted, minAway };
-};
-
+/**
+ * function to push the train schedule to the database
+ * @param {object} db the database
+ * @param {object} trainRecord the object containing information about the train
+ */
 const pushSchedule = (db, trainRecord) => {
-	db.ref().push({
-		name: trainRecord.name,
-		destination: trainRecord.destination,
-		frequency: trainRecord.frequency,
-		nextArrival: trainRecord.nextArrival,
-		minAway: trainRecord.minAway,
-		startTime: trainRecord.startTime,
-		dateAdded: firebase.database.ServerValue.TIMESTAMP
-	}),
-		(err) => {
-			console.log('Error adding to database', err.code);
-		};
+  db.ref().push({
+    name: trainRecord.name,
+    destination: trainRecord.destination,
+    startTime: trainRecord.startTime,
+    frequency: trainRecord.frequency
+  }),
+    err => {
+      console.log('Error adding to database', err.code);
+    };
 };
 
-const onSubmit = (event) => {
-	event.preventDefault();
+/**
+ * function to grab input from the form, add to the database, and update the train schedule
+ * @param {object} event the event to be listen to
+ */
+const onSubmit = event => {
+  event.preventDefault();
 
-	const name = $('#input-name')
-		.val()
-		.trim();
+  const name = $('#input-name')
+    .val()
+    .trim();
 
-	const destination = $('#input-destination')
-		.val()
-		.trim();
+  const destination = $('#input-destination')
+    .val()
+    .trim();
 
-	const frequency = parseInt($('#input-frequency').val());
+  const frequency = parseInt($('#input-frequency').val());
 
-	const time = calculateTime(frequency);
+  const startTime = $('#input-time').val();
 
-	const trainRecord = createTrainRecordObj(
-		name,
-		destination,
-		frequency,
-		time.nextArrivalConverted,
-		time.minAway,
-		time.startTime
-	);
+  const trainRecord = createTrainRecord(
+    name,
+    destination,
+    startTime,
+    frequency
+  );
 
-	pushSchedule(database, trainRecord);
+  pushSchedule(database, trainRecord);
+  updateRenderedTimes(database);
+  clearForm();
 };
 
-const createTrainRecordObj = (
-	name,
-	destination,
-	frequency,
-	nextArrival,
-	minAway,
-	startTime
-) => {
-	const obj = {
-		name: name,
-		destination: destination,
-		frequency: frequency,
-		nextArrival: nextArrival,
-		minAway: minAway,
-		startTime: startTime
-	};
-	return obj;
+/**
+ * function to clear the train schedule and re-render the schedule with updated times
+ * @param {string} db the database
+ */
+const updateRenderedTimes = db => {
+  $('#tbody').empty();
+  getSchedule(db);
 };
 
-const renderSchedule = (trainRecord) => {
-	const tr = $('<tr>');
-	const thName = $('<th>', { scope: 'col' }).text(trainRecord.name);
-	const thDest = $('<th>', { scope: 'col' }).text(trainRecord.destination);
-	const thFreq = $('<th>', { scope: 'col' }).text(trainRecord.frequency);
-	const thArrival = $('<th>', { scope: 'col' }).text(trainRecord.nextArrival);
-	const thTime = $('<th>', { scope: 'col' }).text(trainRecord.minAway);
-
-	tr.append(thName, thDest, thFreq, thArrival, thTime);
-	$('#tbody').append(tr);
+/**
+ * function to calculate the next arrival time and minutes away
+ * @param {string} startTime the time the train starts
+ * @param {integer} frequency the time the train takes before its next arrival
+ */
+const calculateTime = (startTime, frequency) => {
+  const startTimeConverted = moment(startTime, 'HH:mm').subtract(1, 'years');
+  const timeDiff = moment().diff(moment(startTimeConverted), 'minutes');
+  const minAway = frequency - (timeDiff % frequency);
+  const nextArrival = moment().add(minAway, 'minutes');
+  const nextArrivalConverted = moment(nextArrival).format('hh:mm');
+  return { nextArrivalConverted, minAway };
 };
 
-const getSchedule = (db) => {
-	db.ref().on(
-		'child_added',
-		(snapshot) => {
-			renderSchedule(
-				createTrainRecordObj(
-					snapshot.val().name,
-					snapshot.val().destination,
-					snapshot.val().frequency,
-					snapshot.val().nextArrival,
-					snapshot.val().minAway,
-					snapshot.val().startTime
-				)
-			);
-		},
-		(err) => {
-			console.log('Error reading from database: ', err.code);
-		}
-	);
+/**
+ *
+ * @param {string} name the name of the train
+ * @param {string} destination the name of the destintation
+ * @param {string} startTime the time the train starts
+ * @param {integer} frequency the time the train takes before its next arrival
+ */
+const createTrainRecord = (name, destination, startTime, frequency) => {
+  return {
+    name: name,
+    destination: destination,
+    startTime: startTime,
+    frequency: frequency
+  };
 };
 
+/**
+ * function to render the train schedule
+ * @param {object} trainRecord the object containing the name, destination, frequency and start time
+ * @param {object} time the object containing the minutes and next arrival time
+ */
+const renderSchedule = (trainRecord, time) => {
+  const tr = $('<tr>');
+  const thName = $('<th>', { scope: 'col' }).text(trainRecord.name);
+  const thDest = $('<th>', { scope: 'col' }).text(trainRecord.destination);
+  const thFreq = $('<th>', { scope: 'col' }).text(trainRecord.frequency);
+  const thArrival = $('<th>', { scope: 'col' }).text(time.nextArrivalConverted);
+  const thMinAway = $('<th>', { scope: 'col' }).text(time.minAway);
+
+  tr.append(thName, thDest, thFreq, thArrival, thMinAway);
+  $('#tbody').append(tr);
+};
+
+/**
+ * function to render the train schedule from the database everytime the database gets updated
+ * @param {string} db the database
+ */
+const getSchedule = db => {
+  db.ref().on(
+    'child_added',
+    snapshot => {
+      renderSchedule(
+        createTrainRecord(
+          snapshot.val().name,
+          snapshot.val().destination,
+          snapshot.val().startTime,
+          snapshot.val().frequency
+        ),
+        calculateTime(snapshot.val().startTime, snapshot.val().frequency)
+      );
+    },
+    err => {
+      console.log('Error reading from database: ', err.code);
+    }
+  );
+};
+
+/**
+ * function to initialize the firebase
+ * @param {string} key the api key used to access the database
+ */
 const initializeFirebase = (key = FIREBASE_API_KEY) => {
-	var firebaseConfig = {
-		apiKey: key,
-		authDomain: 'train-scheduler-bb190.firebaseapp.com',
-		databaseURL: 'https://train-scheduler-bb190.firebaseio.com',
-		storageBucket: 'train-scheduler-bb190.appspot.com'
-	};
+  var firebaseConfig = {
+    apiKey: key,
+    authDomain: 'train-scheduler-bb190.firebaseapp.com',
+    databaseURL: 'https://train-scheduler-bb190.firebaseio.com',
+    storageBucket: 'train-scheduler-bb190.appspot.com'
+  };
 
-	firebase.initializeApp(firebaseConfig);
-	return firebase.database();
+  firebase.initializeApp(firebaseConfig);
+  return firebase.database();
 };
 
 window.onload = () => {
-	database = initializeFirebase();
-	getSchedule(database);
-	$('#submit-button').click(onSubmit);
+  // set the database
+  database = initializeFirebase();
 
-	console.log(document.getElementById('tbody').children);
+  // pull schedule from the database
+  getSchedule(database);
+
+  // updates train times every minute
+  setInterval(() => {
+    updateRenderedTimes(database);
+  }, 10000);
+
+  // submit button listener
+  $('#submit-button').click(onSubmit);
 };
