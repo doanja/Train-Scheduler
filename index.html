@@ -20,13 +20,25 @@
 
 	<body>
 		<div class="container-fluid">
-			<div class="jumbotron text-center">
-				<div class="container">
-					<h1 class="display-4">Anytime is Train Time</h1>
-					<p class="lead">Choo Choo. Chee Chee.</p>
-				</div>
-			</div>
+			<!-- navbar -->
+			<nav class="navbar navbar-light bg-light">
+				<a
+					class="navbar-brand"
+					href="https://github.com/doanja/Train-Scheduler"
+				>
+					<img
+						src="https://pbs.twimg.com/media/Dd1azdtVMAADKxB.jpg"
+						width="30"
+						height="30"
+						class="d-inline-block align-top"
+					/>
+					Firebase Train Schedule
+				</a>
+			</nav>
 
+			<br />
+
+			<!-- schedule -->
 			<div class="card">
 				<div class="card-header bg-dark text-light">
 					Current Train Schedule
@@ -48,6 +60,7 @@
 
 			<br />
 
+			<!-- train form -->
 			<div class="card">
 				<div class="card-header bg-dark text-light">
 					Add Train
@@ -87,7 +100,7 @@
 			</div>
 		</div>
 
-		<!-- Modal -->
+		<!-- modal -->
 		<div class="modal fade" id="train-modal" tabindex="-1" role="dialog">
 			<div class="modal-dialog">
 				<div class="modal-content">
@@ -130,11 +143,7 @@
 						</form>
 					</div>
 					<div class="modal-footer">
-						<button
-							type="button"
-							class="btn btn-secondary"
-							data-dismiss="modal"
-						>
+						<button class="btn btn-secondary" data-dismiss="modal">
 							Close
 						</button>
 						<button type="submit" class="btn btn-dark" id="submit-button">
