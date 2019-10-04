@@ -50,15 +50,19 @@ const clearForm = () => {
  * @param {object} trainRecord the object containing information about the train
  */
 const pushSchedule = (db, trainRecord) => {
-  db.ref().push({
-    name: trainRecord.name,
-    destination: trainRecord.destination,
-    startTime: trainRecord.startTime,
-    frequency: trainRecord.frequency
-  }),
-    err => {
+  db.ref()
+    .push({
+      name: trainRecord.name,
+      destination: trainRecord.destination,
+      startTime: trainRecord.startTime,
+      frequency: trainRecord.frequency
+    })
+    .then(() => {
+      console.log('Push succeeded');
+    })
+    .catch(err => {
       console.log('Error adding to database', err.code);
-    };
+    });
 };
 
 /**
