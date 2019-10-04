@@ -87,6 +87,64 @@
 			</div>
 		</div>
 
+		<!-- Modal -->
+		<div class="modal fade" id="train-modal" tabindex="-1" role="dialog">
+			<div class="modal-dialog">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title">Update Train</h5>
+						<button type="button" class="close"></button>
+					</div>
+					<div class="modal-body">
+						<form class="p-3">
+							<div class="form-group">
+								<label>Train Name</label>
+								<input
+									type="text"
+									class="form-control"
+									id="input-name"
+									placeholder="Enter train name"
+								/>
+							</div>
+							<div class="form-group">
+								<label>Destination</label>
+								<input
+									type="text"
+									class="form-control"
+									id="input-destination"
+									placeholder="Enter destination"
+								/>
+							</div>
+							<div class="form-group">
+								<label>First Train Time (HH:mm - military time)</label>
+								<input type="time" class="form-control" id="input-time" />
+							</div>
+							<div class="form-group">
+								<label>Frequency (min)</label>
+								<input
+									type="number"
+									class="form-control"
+									id="input-frequency"
+								/>
+							</div>
+						</form>
+					</div>
+					<div class="modal-footer">
+						<button
+							type="button"
+							class="btn btn-secondary"
+							data-dismiss="modal"
+						>
+							Close
+						</button>
+						<button type="submit" class="btn btn-dark" id="submit-button">
+							Submit
+						</button>
+					</div>
+				</div>
+			</div>
+		</div>
+
 		<!-- scripts -->
 		<script
 			src="https://code.jquery.com/jquery-3.3.1.slim.min.js"

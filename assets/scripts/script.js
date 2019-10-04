@@ -130,6 +130,7 @@ const onDelete = (id) => {
  * @param {object} time the object containing the minutes and next arrival time
  */
 const renderSchedule = (trainRecord, time, id) => {
+	// create the elements
 	const tr = $('<tr>');
 	const thName = $('<th>', { scope: 'col' }).text(trainRecord.name);
 	const thDest = $('<th>', { scope: 'col' }).text(trainRecord.destination);
@@ -137,18 +138,25 @@ const renderSchedule = (trainRecord, time, id) => {
 	const thArrival = $('<th>', { scope: 'col' }).text(time.nextArrivalConverted);
 	const thMinAway = $('<th>', { scope: 'col' }).text(time.minAway);
 	const thBtn = $('<th>', { scope: 'col' });
+
+	// create the button elements
 	const btnEdit = $('<button>', {
 		class: 'btn btn-primary m-1  px-3',
-		id: 'edit' + id
+		id: 'edit' + id,
+		'data-toggle': 'modal',
+		'data-target': '#train-modal'
 	}).text('Edit');
 	const btnDel = $('<button>', {
 		class: 'btn btn-danger m-1  px-3',
 		id: 'del' + id
 	}).text('Del');
 
+	// append the elements to the html
 	thBtn.append(btnEdit, btnDel);
 	tr.append(thName, thDest, thFreq, thArrival, thMinAway, thBtn);
 	$('#tbody').append(tr);
+
+	// attach click listeners to the buttons
 	onDelete(id);
 	onEdit(id);
 };
