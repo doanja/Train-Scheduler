@@ -7,6 +7,8 @@ let database; // the database object
 const onSubmitModal = e => {
   e.preventDefault();
 
+  const id = $('#train-id').text();
+
   // check for empty input
   if (!$('.input-m').val()) {
     alert('You must complete the form to submit.');
@@ -17,7 +19,7 @@ const onSubmitModal = e => {
     firebase
       .database()
       .ref()
-      .child($('#train-id').text()) // id of the train data
+      .child(id) // id of the train data
       .set({
         // send input to the database
         name: $('#input-name-m').val(),
@@ -137,10 +139,20 @@ const createTrainRecord = (name, destination, startTime, frequency) => {
   };
 };
 
+/**
+ * function to show the modal when edit is clicked
+ * @param {string} id the id of the data in the database
+ * @param {object} trainRecord the object containing the name, destination, frequency and start time
+ */
 const onEdit = (id, trainRecord) => {
   $('#edit' + id).click(() => {
+    // set the modal title
     $('.modal-title').text('Update ' + trainRecord.name);
+
+    // store the train id on hidden element on the modal
     $('#train-id').text(id);
+
+    // set the modal values
     $('#input-name-m').val(trainRecord.name);
     $('#input-destination-m').val(trainRecord.destination);
     $('#input-time-m').val(trainRecord.startTime);
@@ -254,9 +266,9 @@ window.onload = () => {
   getSchedule(database);
 
   // updates train times every minute
-  // setInterval(() => {
-  // 	updateRenderedTimes(database);
-  // }, 10000);
+  setInterval(() => {
+    updateRenderedTimes(database);
+  }, 10000);
 
   // submit button listener
   $('#submit-button').click(onSubmit);
